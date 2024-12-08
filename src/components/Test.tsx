@@ -1,12 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import React, { useEffect } from "react";
-
-export type Translations = { MyComponent: { welcomeMessage: string } };
+import lang from "../../messages/en.json";
+import { useClientTranslations } from "@/libs/i18n-client";
 
 function Test() {
-  const t = useTranslations();
+  const { t } = useClientTranslations();
 
   useEffect(() => {
     console.log(t("hello"));

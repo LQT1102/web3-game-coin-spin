@@ -1,10 +1,15 @@
-import Test from "@/components/Test.tsx";
-import { useTranslations } from "next-intl";
+import Test from "@/components/Test";
+import useServerTranslations from "@/libs/i18n-server";
 import Image from "next/image";
 
-export default function Home() {
-  const t = useTranslations();
-
+export default async function Home({
+  params,
+}: Readonly<{
+  params: Promise<{ locale: string }>;
+}>) {
+  const { locale } = await params;
+  const { t } = await useServerTranslations(locale);
+  console.log("==========Render page: " + Date.now());
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
@@ -105,3 +110,7 @@ export default function Home() {
     </div>
   );
 }
+
+const revalidate = 1000,
+  dynamic = "force-static";
+export { revalidate, dynamic };
