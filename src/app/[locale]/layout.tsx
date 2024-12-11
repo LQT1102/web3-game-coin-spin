@@ -29,12 +29,15 @@ export default async function RootLayout({
 }>) {
   const { locale } = await params;
   const messages = await getMessages({ locale });
+
+  console.log("RootLayout Build at " + new Date().toISOString());
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <div>Root layout</div>
           {children}
         </NextIntlClientProvider>
       </body>

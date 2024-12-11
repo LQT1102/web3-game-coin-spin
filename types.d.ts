@@ -4,3 +4,7 @@ type NestedKeyOf<ObjectType extends object> = {
       `${Key}` | `${Key}.${NestedKeyOf<ObjectType[Key]>}`
     : `${Key}`;
 }[keyof ObjectType & (string | number)];
+
+interface Window {
+  ethereum: ethers.providers.ExternalProvider;
+}
