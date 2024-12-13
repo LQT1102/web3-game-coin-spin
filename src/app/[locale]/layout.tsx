@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import "../globals.css";
+import { Web3Provider } from "@/contexts/web3Context";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -37,8 +38,10 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <div>Root layout</div>
-          {children}
+          <Web3Provider>
+            <div>Root layout</div>
+            {children}
+          </Web3Provider>
         </NextIntlClientProvider>
       </body>
     </html>
