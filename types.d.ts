@@ -8,3 +8,5 @@ type NestedKeyOf<ObjectType extends object> = {
 interface Window {
   ethereum: ethers.providers.ExternalProvider;
 }
+
+type Nullable<T> = T | undefined | null;
