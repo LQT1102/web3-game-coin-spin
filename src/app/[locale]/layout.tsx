@@ -5,6 +5,7 @@ import { getMessages } from "next-intl/server";
 import "../globals.css";
 import { Web3Provider } from "@/contexts/web3Context";
 import { ContractProvider } from "@/contexts/contractContext";
+import ThemeWrapper from "@/components/base/ThemeWrapper/ThemeWrapper";
 
 const geistSans = localFont({
   src: "../fonts/GeistVF.woff",
@@ -34,14 +35,14 @@ export default async function RootLayout({
 
   console.log("RootLayout Build at " + new Date().toISOString());
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en" data-theme="dark">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ContractProvider>
             <Web3Provider>
-              <div>Root layout</div>
+              <ThemeWrapper>
+                <div>Root layout</div>
+              </ThemeWrapper>
               {children}
             </Web3Provider>
           </ContractProvider>

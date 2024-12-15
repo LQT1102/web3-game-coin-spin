@@ -28,8 +28,7 @@ const ContractContext = createContext<Partial<ContractContextProps>>({
 export const useContract = () => useContext(ContractContext);
 
 export const ContractProvider = ({ children }: { children: ReactNode }) => {
-  const [mainContract, setMainContract] =
-    useState<Partial<ContractContextProps>>();
+  const [mainContract, setMainContract] = useState<Partial<ContractContextProps>>();
 
   const init = () => {
     const chainId = process.env.NEXT_PUBLIC_CHAIN_ID as Nullable<string>;
@@ -44,9 +43,5 @@ export const ContractProvider = ({ children }: { children: ReactNode }) => {
     return () => {};
   }, []);
 
-  return (
-    <ContractContext.Provider value={{ ...mainContract }}>
-      {children}
-    </ContractContext.Provider>
-  );
+  return <ContractContext.Provider value={{ ...mainContract }}>{children}</ContractContext.Provider>;
 };
