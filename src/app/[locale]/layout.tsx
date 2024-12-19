@@ -41,9 +41,9 @@ export default async function RootLayout({
           <ContractProvider>
             <Web3Provider>
               <ThemeWrapper>
-                <div>Root layout</div>
+                {/* <div>Root layout</div> */}
+                {children}
               </ThemeWrapper>
-              {children}
             </Web3Provider>
           </ContractProvider>
         </NextIntlClientProvider>
