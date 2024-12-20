@@ -10,20 +10,29 @@ export default async function PublicLayout({
 }>) {
   return (
     <div className="mx-auto w-full max-w-7xl lg:px-8 py-8">
-      <div className="container flex items-center w-full">
-        <div className="line h-1 bg-gradient-to-r from-transparent to-green-500 flex-grow mr-5"></div>
-        <div className="center-content flex items-center">
-          <Image src="/vercel.svg" alt="Soccer Ball" width={50} height={50} className="icon w-10 h-auto" />
+      <div className="container flex items-center w-full gap-4">
+        {/* <div className="line h-1 bg-gradient-to-r from-transparent to-success flex-grow mr-5"></div> */}
+
+        <div className="flex-1 min-w-0">Thông tin account</div>
+
+        <div className="flex justify-center items-center">
+          <Image
+            src="/images/coin.png"
+            alt="Soccer Ball"
+            width={150}
+            height={150}
+            className="icon animate-[spin_3s_linear_infinite] w-[100px] h-[100px]"
+          />
         </div>
-        <div className="line h-1 bg-gradient-to-r from-green-500 to-transparent flex-grow ml-5"></div>
+        <div className="flex-1 min-w-0">Chọn theme</div>
       </div>
 
       {/* lg */}
       <div role="tablist" className="tabs tabs-bordered tabs-lg mt-10">
-        <a role="tab" className="tab">
+        <a role="tab" className="tab !border-success !border-opacity-80">
           Phòng game
         </a>
-        <a role="tab" className="tab tab-active">
+        <a role="tab" className="tab">
           Lịch sử
         </a>
       </div>

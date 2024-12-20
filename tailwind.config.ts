@@ -1,5 +1,10 @@
 import type { Config } from "tailwindcss";
 
+const spacing = {} as any;
+for (let i = 0; i <= 128; i++) {
+  spacing[i] = `${i * 4}px`;
+}
+
 export default {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
@@ -12,6 +17,7 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
       },
+      spacing,
     },
   },
   plugins: [require("daisyui")],
