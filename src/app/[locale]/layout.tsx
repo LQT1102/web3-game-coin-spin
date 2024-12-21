@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import "../globals.css";
 import { Web3Provider } from "@/contexts/web3Context";
 import { ContractProvider } from "@/contexts/contractContext";
-import ThemeWrapper from "@/components/base/ThemeWrapper/ThemeWrapper";
 import { Inter } from "next/font/google";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -31,18 +30,18 @@ export default async function RootLayout({
 
   console.log("RootLayout Build at " + new Date().toISOString());
   return (
-    <html lang="en" data-theme="dark">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <ContractProvider>
-            <Web3Provider>
-              <ThemeWrapper>
+        <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <ContractProvider>
+              <Web3Provider>
                 {/* <div>Root layout</div> */}
                 {children}
-              </ThemeWrapper>
-            </Web3Provider>
-          </ContractProvider>
-        </NextIntlClientProvider>
+              </Web3Provider>
+            </ContractProvider>
+          </NextIntlClientProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

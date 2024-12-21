@@ -39,6 +39,7 @@ export default {
           success: "#1BB96B",
           warning: "#B98D1B",
           error: "#B91B5D",
+          info: "#B98D1B",
         },
       },
     ], // false: only light + dark | true: all themes | array: specific themes like this ["light", "dark", "cupcake"]
