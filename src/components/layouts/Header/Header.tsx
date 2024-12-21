@@ -1,6 +1,7 @@
 "use client";
 
-import { formatAddressView } from "@/utils/converter";
+import { useWeb3 } from "@/contexts/web3Context";
+import { bigintToResultView, formatAddressView } from "@/utils/converter";
 import { BanknotesIcon, WalletIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -16,6 +17,8 @@ const ThemeButtonOnlyClient = dynamic(() => import("../../features/ThemeButton/T
 type Props = {};
 
 const Header = (props: Props) => {
+  const { currentAccount } = useWeb3();
+
   return (
     <div className="flex items-center w-full gap-4">
       {/* <div className="line h-1 bg-gradient-to-r from-transparent to-success flex-grow mr-5"></div> */}
@@ -23,12 +26,12 @@ const Header = (props: Props) => {
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <div className="flex gap-2">
           <WalletIcon width={24} className="text-info" />
-          <span>{formatAddressView("0xA519376E122760E5606FeF2453787a1d61Ff40D7")} </span>
+          <span>{formatAddressView(currentAccount?.account?.address || "")} </span>
         </div>
 
         <div className="flex gap-3">
           <BanknotesIcon width={24} className="text-info" />
-          <span>0.000000000001 ETH</span>
+          <span>{bigintToResultView(currentAccount?.balance)} ETH</span>
         </div>
       </div>
 

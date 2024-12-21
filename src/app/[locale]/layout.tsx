@@ -32,7 +32,7 @@ export default async function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
-        <ThemeProvider attribute="data-theme" defaultTheme="system" enableSystem>
+        <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ContractProvider>
               <Web3Provider>

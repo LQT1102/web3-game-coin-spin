@@ -15,13 +15,19 @@ import {
 } from "@/utils/web3Helper";
 import { useContract } from "./contractContext";
 
+interface CurrentAccount {
+  account: Nullable<ethers.JsonRpcSigner>;
+  balance: Nullable<bigint>;
+}
+
 // Khởi tạo context
 interface Web3ContextProps {
   provider: Nullable<ethers.BrowserProvider>;
   signer: Nullable<ethers.Signer>;
   accounts: Nullable<ethers.JsonRpcSigner[]>;
   network: Nullable<ethers.Network>;
-  currentAccount: Nullable<ethers.JsonRpcSigner>;
+  currentAccount: Nullable<CurrentAccount>;
+  status: Nullable<"OK" | "ERROR">;
 }
 
 const Web3Context = createContext<Web3ContextProps>({
@@ -30,6 +36,7 @@ const Web3Context = createContext<Web3ContextProps>({
   accounts: null,
   network: null,
   currentAccount: null,
+  status: null,
 });
 
 // Hook để sử dụng Web3Context
@@ -40,9 +47,27 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
   const [signer, setSigner] = useState<Nullable<ethers.Signer>>(null);
   const [accounts, setAccounts] = useState<Nullable<ethers.JsonRpcSigner[]>>(null);
   const [network, setNetwork] = useState<Nullable<ethers.Network>>(null);
-  const [currentAccount, setCurrentAccount] = useState<Nullable<ethers.JsonRpcSigner>>(null);
+  const [currentAccount, setCurrentAccount] = useState<Nullable<CurrentAccount>>(null);
+  const [status, setStatus] = useState<Nullable<"OK" | "ERROR">>();
 
   const { chainId, address } = useContract();
+
+  /**
+   * Refresh lại account trên global state
+   * @param provider
+   */
+  const refreshWeb3Context = async (provider: ethers.BrowserProvider) => {
+    const [network, accounts] = await Promise.all([getCurrentNetwork(provider), getAccounts(provider)]);
+
+    setNetwork(network);
+    setAccounts(accounts);
+
+    const account = accounts[0];
+    // Lấy số dư của tài khoản
+    const balance = await provider.getBalance(account);
+
+    setCurrentAccount({ account, balance });
+  };
 
   const initWeb3 = async () => {
     if (window.ethereum) {
@@ -51,17 +76,7 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
         if (web3Provider.provider !== undefined) {
           setProvider(web3Provider.provider);
 
-          const [network, accounts] = await Promise.all([
-            getCurrentNetwork(web3Provider.provider),
-            getAccounts(web3Provider.provider),
-          ]);
-
-          setNetwork(network);
-          setAccounts(accounts);
-
-          const account = accounts[0];
-          // Lấy số dư của tài khoản
-          setCurrentAccount(account);
+          await refreshWeb3Context(web3Provider.provider);
         }
 
         if (web3Provider.signer) {
@@ -69,25 +84,34 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
         }
       } catch (error) {
         console.error("Error accessing accounts or network:", error);
+        setStatus("ERROR");
       }
 
       // Lắng nghe sự kiện thay đổi tài khoản
       window.ethereum.on("accountsChanged", async (accounts: string[]) => {
         //Update số dư
-        const web3Provider = await getProvider();
-        if (web3Provider.provider !== undefined) {
-          const accounts = await getAccounts(web3Provider.provider);
-          setAccounts(accounts);
-          setCurrentAccount(accounts[0]);
+        try {
+          const web3Provider = await getProvider();
+          if (web3Provider.provider !== undefined) {
+            await refreshWeb3Context(web3Provider.provider);
+          }
+        } catch (error) {
+          console.error(error);
+          setStatus("ERROR");
         }
       });
 
       // Lắng nghe sự kiện thay đổi mạng
       window.ethereum.on("chainChanged", async (chainId: string) => {
-        const web3Provider = await getProvider();
-        if (web3Provider.provider !== undefined) {
-          const network = await getCurrentNetwork(web3Provider.provider);
-          setNetwork(network);
+        try {
+          const web3Provider = await getProvider();
+          if (web3Provider.provider !== undefined) {
+            const network = await getCurrentNetwork(web3Provider.provider);
+            setNetwork(network);
+          }
+        } catch (error) {
+          console.error(error);
+          setStatus("ERROR");
         }
       });
     }
@@ -115,7 +139,7 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <Web3Context.Provider value={{ provider, signer, accounts, network, currentAccount }}>
+    <Web3Context.Provider value={{ provider, signer, accounts, network, currentAccount, status }}>
       {children}
     </Web3Context.Provider>
   );

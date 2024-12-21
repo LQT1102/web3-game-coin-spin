@@ -6,7 +6,8 @@ import { ethers } from "ethers";
  * @param bigint
  * @returns
  */
-export const bigintToResultView = (bigint: bigint) => {
+export const bigintToResultView = (bigint: any) => {
+  if (!bigint) return 0;
   return ethers.formatEther(bigint);
 };
 
