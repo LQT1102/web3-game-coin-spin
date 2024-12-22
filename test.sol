@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract SimplifiedEvenOddGame {
+contract CoinTossGame {
     address public owner;
     uint256 public feePercent = 5; // feePercent toàn cục
-    uint256 public ownerBalance;
+    uint256 private _ownerBalance; // Thay đổi ownerBalance thành private
 
     bool private _reentrant = false;
 
@@ -22,11 +22,12 @@ contract SimplifiedEvenOddGame {
     }
 
     struct Game {
+        uint256 gameId;
         address player1;
         address player2;
         uint256 betAmount;
         GameStatus status;
-        bool player1Choice; // true: Chẵn, false: Lẻ
+        bool player1Choice; // true: Mặt ngửa, false: mặt úp
         bool isWinnerPlayer1; // true: player1 thắng, false: player2 thắng
         bool claimed;
         uint256 feePercentAtCreateTime; // Lưu trữ feePercent tại thời điểm tạo game
@@ -77,6 +78,7 @@ contract SimplifiedEvenOddGame {
         nextGameId++;
 
         games[gameId] = Game({
+            gameId: gameId,
             player1: msg.sender,
             player2: address(0),
             betAmount: msg.value,
@@ -84,7 +86,7 @@ contract SimplifiedEvenOddGame {
             player1Choice: _choice,
             isWinnerPlayer1: false,
             claimed: false,
-            feePercentAtCreateTime: feePercent // Lấy feePercent tại thời điểm tạo game
+            feePercentAtCreateTime: feePercent
         });
 
         waitingGames[gameId] = true;
@@ -113,7 +115,7 @@ contract SimplifiedEvenOddGame {
 
         // Sử dụng feePercentAtCreateTime để tính toán
         uint256 fee = (game.betAmount * game.feePercentAtCreateTime) / 100;
-        ownerBalance += fee;
+        _ownerBalance += fee; // Cập nhật _ownerBalance
 
         // Tính toán số tiền thắng
         uint256 winningAmount = game.betAmount + (game.betAmount - fee);
@@ -185,13 +187,18 @@ contract SimplifiedEvenOddGame {
     }
 
     function withdrawOwnerBalance() external onlyOwner nonReentrant {
-        uint256 amount = ownerBalance;
-        ownerBalance = 0;
+        uint256 amount = _ownerBalance;
+        _ownerBalance = 0;
         payable(owner).transfer(amount);
     }
 
     function getGameById(uint256 _gameId) public view returns (Game memory) {
-        require(games[_gameId].betAmount > 0, "Game does not exist");
+        require(games[_gameId].betAmount > 0, "Game does not exist or has been canceled");
         return games[_gameId];
+    }
+
+    // Hàm mới để owner xem ownerBalance
+    function getOwnerBalance() external view onlyOwner returns (uint256) {
+        return _ownerBalance;
     }
 }

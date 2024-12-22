@@ -1,15 +1,13 @@
 import Test from "@/components/Test";
+import { TableAvailableGames } from "@/components/features/TableAvailableGames";
 import useServerTranslations from "@/libs/i18n-server";
-import Image from "next/image";
+import { formatAddressView } from "@/utils/converter";
 import dynamicImport from "next/dynamic";
 
-const DynamicComponent = dynamicImport(
-  () => import("@/components/Foo").then((x) => x.default) as any,
-  {
-    loading: () => <p>Loading...</p>,
-    //Ssr false chỉ dùng được khi ở client component, chỉ định có kết xuất html trước ở server component hay xuống client mới kết xuất
-  }
-);
+const DynamicComponent = dynamicImport(() => import("@/components/Foo") as any, {
+  loading: () => <div>...</div>,
+  //Ssr false chỉ dùng được khi ở client component, chỉ định có kết xuất html trước ở server component hay xuống client mới kết xuất
+});
 
 export default async function Home({
   params,
@@ -19,19 +17,17 @@ export default async function Home({
   const { locale } = await params;
   const { t } = await useServerTranslations(locale);
   console.log("==========Render page: " + Date.now());
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <button className="btn btn-primary">Button</button>
-        <button data-toggle-theme="dark,light" data-act-class="ACTIVECLASS" className="btn btn-primary">
-          Toggle theme
-        </button>
 
-        {t("hello")}
-        <DynamicComponent />
-        <Test />
-      </main>
-    </div>
+  return (
+    <main>
+      <div className="my-6">
+        <button className="btn btn-info btn-sm">Create new game</button>
+      </div>
+
+      <div className="overflow-x-auto">
+        <TableAvailableGames />
+      </div>
+    </main>
   );
 }
 

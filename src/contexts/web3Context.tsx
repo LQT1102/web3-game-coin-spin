@@ -1,5 +1,5 @@
 "use client";
-
+// Khai báo context liên quan đến các đối tượng trong web3, validate
 import React, {
   createContext,
   useContext,
@@ -14,6 +14,7 @@ import {
   getProvider,
 } from "@/utils/web3Helper";
 import { useContract } from "./contractContext";
+import { MainContractAbi, MainContractAbi__factory } from "@root/types/ethers-contracts";
 
 interface CurrentAccount {
   account: Nullable<ethers.JsonRpcSigner>;
@@ -28,6 +29,7 @@ interface Web3ContextProps {
   network: Nullable<ethers.Network>;
   currentAccount: Nullable<CurrentAccount>;
   status: Nullable<"OK" | "ERROR">;
+  mainContractConnection: Nullable<MainContractAbi>;
 }
 
 const Web3Context = createContext<Web3ContextProps>({
@@ -37,6 +39,7 @@ const Web3Context = createContext<Web3ContextProps>({
   network: null,
   currentAccount: null,
   status: null,
+  mainContractConnection: null
 });
 
 // Hook để sử dụng Web3Context
@@ -49,6 +52,7 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
   const [network, setNetwork] = useState<Nullable<ethers.Network>>(null);
   const [currentAccount, setCurrentAccount] = useState<Nullable<CurrentAccount>>(null);
   const [status, setStatus] = useState<Nullable<"OK" | "ERROR">>();
+  const [mainContractConnection, setMainContractConnection] = useState<Nullable<MainContractAbi>>();
 
   const { chainId, address } = useContract();
 
@@ -63,9 +67,10 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
     setAccounts(accounts);
 
     const account = accounts[0];
+    const mainContract = MainContractAbi__factory.connect(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "", provider);
+    setMainContractConnection(mainContract);
     // Lấy số dư của tài khoản
     const balance = await provider.getBalance(account);
-
     setCurrentAccount({ account, balance });
   };
 
@@ -114,6 +119,8 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
           setStatus("ERROR");
         }
       });
+    }else{
+      setStatus("ERROR")
     }
   };
 
@@ -139,7 +146,9 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <Web3Context.Provider value={{ provider, signer, accounts, network, currentAccount, status }}>
+    <Web3Context.Provider
+      value={{ provider, signer, accounts, network, currentAccount, status, mainContractConnection }}
+    >
       {children}
     </Web3Context.Provider>
   );

@@ -10,3 +10,13 @@ interface Window {
 }
 
 type Nullable<T> = T | undefined | null;
+
+declare global {
+  interface BigInt {
+    toJSON(): Number;
+  }
+}
+
+BigInt.prototype.toJSON = function () {
+  return Number(this);
+};

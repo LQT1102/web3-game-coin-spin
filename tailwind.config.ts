@@ -26,11 +26,13 @@ export default {
       {
         light: {
           ...require("daisyui/src/theming/themes")["light"],
+          info: "#ffbf00",
+          "base-100": "#fafafa",
         },
       },
       {
         dark: {
-          ...require("daisyui/src/theming/themes")["light"],
+          ...require("daisyui/src/theming/themes")["dark"],
           "base-content": "#fff",
           "neutral-content": "rgba(255, 255, 255, 0.6)", //Màu cho các phần không cần nổi bật
           "base-100": "#060019", //Màu nền chính

@@ -1,8 +1,9 @@
 "use client";
 
+import Address from "@/components/base/Address/Address";
 import { useWeb3 } from "@/contexts/web3Context";
 import { bigintToResultView, formatAddressView } from "@/utils/converter";
-import { BanknotesIcon, WalletIcon } from "@heroicons/react/24/outline";
+import { BanknotesIcon, ExclamationTriangleIcon, WalletIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 
@@ -17,7 +18,20 @@ const ThemeButtonOnlyClient = dynamic(() => import("../../features/ThemeButton/T
 type Props = {};
 
 const Header = (props: Props) => {
-  const { currentAccount } = useWeb3();
+  const { currentAccount, status } = useWeb3();
+
+  console.log(status);
+
+  if (status == "ERROR") {
+    return (
+      <div className="w-full flex flex-col gap-4 justify-center items-center">
+        <ExclamationTriangleIcon width={80} className="text-red-500" />
+        <div className="text-3xl text-red-500">
+          Đã xảy ra lỗi, vui lòng kiểm tra lại trạng thái kết nối với mạng và ví của bạn
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex items-center w-full gap-4">
@@ -26,7 +40,7 @@ const Header = (props: Props) => {
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <div className="flex gap-2">
           <WalletIcon width={24} className="text-info" />
-          <span>{formatAddressView(currentAccount?.account?.address || "")} </span>
+          <Address address={currentAccount?.account?.address || ""} />
         </div>
 
         <div className="flex gap-3">
@@ -44,7 +58,7 @@ const Header = (props: Props) => {
           className="icon animate-[spin_3s_linear_infinite] w-[100px] h-[100px]"
         />
 
-        <h1>EZ Coin Toss</h1>
+        <h1 className="font-bold text-xl mt-5 border-y-[2px] border-info text-info">EZ Coin Toss</h1>
       </div>
 
       <div className="flex-1 min-w-0 flex justify-end mb-auto">
