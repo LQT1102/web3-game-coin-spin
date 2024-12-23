@@ -1,4 +1,5 @@
 import Test from "@/components/Test";
+import { ClientAvailableGames } from "@/components/features/ClientAvailableGames";
 import { TableAvailableGames } from "@/components/features/TableAvailableGames";
 import useServerTranslations from "@/libs/i18n-server";
 import { formatAddressView } from "@/utils/converter";
@@ -20,13 +21,7 @@ export default async function Home({
 
   return (
     <main>
-      <div className="my-6">
-        <button className="btn btn-info btn-sm">Create new game</button>
-      </div>
-
-      <div className="overflow-x-auto">
-        <TableAvailableGames />
-      </div>
+      <ClientAvailableGames />
     </main>
   );
 }

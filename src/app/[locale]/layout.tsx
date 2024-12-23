@@ -31,7 +31,7 @@ export default async function RootLayout({
   console.log("RootLayout Build at " + new Date().toISOString());
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} antialiased`}>
+      <body className={`${inter.className} antialiased`} id="body">
         <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <ContractProvider>

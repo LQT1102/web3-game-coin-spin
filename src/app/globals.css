@@ -18,3 +18,9 @@ body {
   @apply text-base-content bg-base-100;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+
+.modal-box-custom{
+  @apply modal-box bg-base-200
+}
+
