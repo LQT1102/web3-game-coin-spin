@@ -7,11 +7,14 @@ import { Modal } from "@/components/base/Modal";
 import Image from "next/image";
 import RadioImageControlled from "@/components/form/controllers/RadioImageController/RadioImageControlled";
 import { useForm } from "react-hook-form";
+import { FieldWrapper } from "@/components/form/FieldWrapper";
+import { useAppLoading } from "@/contexts/loadingContext";
 
 type Props = {};
 
 interface FormValues {
-  myRadioField: string; // Thay đổi name cho phù hợp
+  isHeads: boolean;
+  betAmount: number;
 }
 
 const ClientAvailableGames = (props: Props) => {
@@ -19,8 +22,18 @@ const ClientAvailableGames = (props: Props) => {
   const [data, setData] = useState<CoinTossGame.GameStructOutput[]>([]);
   const modalRef = useRef(null);
 
-  const { handleSubmit, control } = useForm<FormValues>();
+  const { showLoading, state } = useAppLoading();
+  console.log(state.isLoading);
 
+  const { handleSubmit, control, register, getValues, watch } = useForm<FormValues>({
+    defaultValues: {
+      betAmount: 0,
+      isHeads: true,
+    },
+  });
+
+  const value = watch();
+  console.log(value);
   useEffect(() => {
     if (mainContractConnection) {
       (async () => {
@@ -51,15 +64,35 @@ const ClientAvailableGames = (props: Props) => {
         </button>
       </div>
 
-      <Modal ref={modalRef}>
-        <RadioImageControlled
-          name="myRadioField"
-          options={[
-            { value: "true", imageSrc: "/images/Coin-Heads.png", alt: "Heads" },
-            { value: "false", imageSrc: "/images/Coin-Tails.png", alt: "Tails" },
-          ]}
-          control={control}
-        />
+      <Modal ref={modalRef} title="Tạo mới trò chơi">
+        <div className="flex flex-col gap-4">
+          <FieldWrapper label="Số lượng ETH">
+            <input
+              {...register("betAmount", { valueAsNumber: true })}
+              type="number"
+              placeholder="Nhập số lượng ETH"
+              className="input input-bordered w-full max-w-xs placeholder:text-sm placeholder:text-opacity-0"
+            />
+          </FieldWrapper>
+
+          <FieldWrapper label="Bạn chọn">
+            <RadioImageControlled
+              name="isHeads"
+              isBooleanValue
+              options={[
+                { value: true, imageSrc: "/images/Coin-Heads.png", alt: "Heads" },
+                { value: false, imageSrc: "/images/Coin-Tails.png", alt: "Tails" },
+              ]}
+              control={control}
+            />
+          </FieldWrapper>
+        </div>
+
+        <div className="mt-5 flex justify-center">
+          <button className="btn btn-success" type="submit">
+            Tạo mới
+          </button>
+        </div>
       </Modal>
 
       <div className="overflow-x-auto">

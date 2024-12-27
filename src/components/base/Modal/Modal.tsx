@@ -38,7 +38,7 @@ const Modal = forwardRef<ModalRef, Props>(({ children, id = "modal", title, onCl
           ✕
         </button>
 
-        {!title && <h3 className="font-bold text-lg">{title}</h3>}
+        {!!title && <h3 className="font-bold text-xl mb-5 text-neutral-content">{title}</h3>}
         {children}
       </div>
       {/* close the modal when clicked outside */}

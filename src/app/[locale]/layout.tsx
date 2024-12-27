@@ -6,6 +6,7 @@ import { Web3Provider } from "@/contexts/web3Context";
 import { ContractProvider } from "@/contexts/contractContext";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "next-themes";
+import { LoadingProvider } from "@/contexts/loadingContext";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,12 +35,14 @@ export default async function RootLayout({
       <body className={`${inter.className} antialiased`} id="body">
         <ThemeProvider attribute="data-theme" defaultTheme="dark" enableSystem>
           <NextIntlClientProvider locale={locale} messages={messages}>
-            <ContractProvider>
-              <Web3Provider>
-                {/* <div>Root layout</div> */}
-                {children}
-              </Web3Provider>
-            </ContractProvider>
+            <LoadingProvider>
+              <ContractProvider>
+                <Web3Provider>
+                  {/* <div>Root layout</div> */}
+                  {children}
+                </Web3Provider>
+              </ContractProvider>
+            </LoadingProvider>
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>

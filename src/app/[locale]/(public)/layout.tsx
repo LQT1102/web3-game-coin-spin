@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import dynamicImport from "next/dynamic";
 import { HomeTab } from "@/components/features/HomeTab";
+import { AppLoading } from "@/components/base/AppLoading";
 
 export default async function PublicLayout({
   children,
@@ -29,6 +30,8 @@ export default async function PublicLayout({
       {/* <Link href={"/foo"}>Go Foo</Link>
       <Link href={"/bar"}>Go Bar</Link> */}
       {children}
+
+      <AppLoading />
     </div>
   );
 }

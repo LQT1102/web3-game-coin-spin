@@ -34,9 +34,9 @@ export default {
         dark: {
           ...require("daisyui/src/theming/themes")["dark"],
           "base-content": "#fff",
-          "neutral-content": "rgba(255, 255, 255, 0.6)", //Màu cho các phần không cần nổi bật
+          "neutral-content": "#a6adbb", //Màu cho các phần không cần nổi bật
           "base-100": "#060019", //Màu nền chính
-          "base-200": "#2A253A", //Nền sáng hơn nền chính
+          "base-200": "#1D232A", //Nền sáng hơn nền chính
           neutral: "#130D25", //Màu nền phụ không nổi bật (section )
           success: "#1BB96B",
           warning: "#B98D1B",
