@@ -15,6 +15,7 @@ import {
 } from "@/utils/web3Helper";
 import { useContract } from "./contractContext";
 import { MainContractAbi, MainContractAbi__factory } from "@root/types/ethers-contracts";
+import { useAppLoading } from "./loadingContext";
 
 interface CurrentAccount {
   account: Nullable<ethers.JsonRpcSigner>;
@@ -39,7 +40,7 @@ const Web3Context = createContext<Web3ContextProps>({
   network: null,
   currentAccount: null,
   status: null,
-  mainContractConnection: null
+  mainContractConnection: null,
 });
 
 // Hook để sử dụng Web3Context
@@ -53,7 +54,7 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
   const [currentAccount, setCurrentAccount] = useState<Nullable<CurrentAccount>>(null);
   const [status, setStatus] = useState<Nullable<"OK" | "ERROR">>();
   const [mainContractConnection, setMainContractConnection] = useState<Nullable<MainContractAbi>>();
-
+  const { showLoading, hideLoading } = useAppLoading();
   const { chainId, address } = useContract();
 
   /**
@@ -67,7 +68,8 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
     setAccounts(accounts);
 
     const account = accounts[0];
-    const mainContract = MainContractAbi__factory.connect(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "", provider);
+    const signer = await provider.getSigner(account.address);
+    const mainContract = MainContractAbi__factory.connect(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "", signer);
     setMainContractConnection(mainContract);
     // Lấy số dư của tài khoản
     const balance = await provider.getBalance(account);
@@ -119,8 +121,8 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
           setStatus("ERROR");
         }
       });
-    }else{
-      setStatus("ERROR")
+    } else {
+      setStatus("ERROR");
     }
   };
 
@@ -134,7 +136,11 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
   }, [chainId, address, network]);
 
   useEffect(() => {
-    initWeb3();
+    (async () => {
+      showLoading();
+      await initWeb3();
+      hideLoading();
+    })();
 
     // Clean up các listener khi component bị unmount
     return () => {

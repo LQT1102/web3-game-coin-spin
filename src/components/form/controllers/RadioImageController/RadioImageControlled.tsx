@@ -1,3 +1,4 @@
+import classNames from "classnames";
 import React from "react";
 import { useController, UseControllerProps, Control } from "react-hook-form";
 
@@ -32,7 +33,7 @@ const RadioImageControlled = <T extends Record<string, any>>({
   return (
     <div className="flex items-center space-x-4">
       {options.map((option) => (
-        <label key={option.value} className="cursor-pointer">
+        <label key={option.value} className="cursor-pointer flex flex-col justify-center items-center">
           <input
             type="radio"
             {...field}
@@ -53,9 +54,23 @@ const RadioImageControlled = <T extends Record<string, any>>({
             src={option.imageSrc}
             alt={option.alt}
             className={`w-16 h-16 rounded-full border-2 ${
-              isChecked(field.value, option.value) ? "border-blue-500" : "border-transparent"
+              isChecked(field.value, option.value) ? "border-info" : "border-transparent"
             }`}
           />
+
+          {!!option.label && (
+            <span
+              className={
+                "text-sm " +
+                classNames({
+                  "text-info font-bold": isChecked(field.value, option.value),
+                  "text-neutral-content": !isChecked(field.value, option.value)
+                })
+              }
+            >
+              {option.label}
+            </span>
+          )}
         </label>
       ))}
     </div>

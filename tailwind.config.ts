@@ -28,6 +28,7 @@ export default {
           ...require("daisyui/src/theming/themes")["light"],
           info: "#ffbf00",
           "base-100": "#fafafa",
+          "neutral-content": "#484e54",
         },
       },
       {

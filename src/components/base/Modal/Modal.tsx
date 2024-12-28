@@ -17,7 +17,7 @@ const Modal = forwardRef<ModalRef, Props>(({ children, id = "modal", title, onCl
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   useImperativeHandle(ref, () => ({
-    showModal: () => dialogRef.current?.showModal(),
+    showModal: () => dialogRef.current?.show(), //show thay cho show modal để không bị đưa lên toplayer
     close: () => dialogRef.current?.close(),
   }));
 
@@ -42,7 +42,7 @@ const Modal = forwardRef<ModalRef, Props>(({ children, id = "modal", title, onCl
         {children}
       </div>
       {/* close the modal when clicked outside */}
-      <form method="dialog" className="modal-backdrop">
+      <form method="dialog" className="modal-backdrop bg-base-100 bg-opacity-70">
         <button></button>
       </form>
     </dialog>

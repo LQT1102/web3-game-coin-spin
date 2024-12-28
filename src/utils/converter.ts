@@ -1,5 +1,5 @@
 //Các hàm dùng convert giá trị
-import { ethers } from "ethers";
+import { ethers, formatEther, parseUnits } from "ethers";
 
 /**
  * Lấy ra dạng hiển thị là string của 1  số bigint (Không được dùng để tính toán)
@@ -46,3 +46,7 @@ export const transformWeb3Response = function transformWeb3Response<T>(response:
 
   return response;
 };
+
+export const etherToWei = (etherValue: any) => parseUnits(etherValue?.toString(), "ether");
+
+export const weiToEther = (weiValue: any) => formatEther(weiValue?.toString());
