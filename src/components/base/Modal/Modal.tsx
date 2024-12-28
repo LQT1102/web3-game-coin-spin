@@ -5,7 +5,7 @@ type Props = {
   title?: string;
   children?: ReactNode;
   id?: string;
-  onClose?: () => {};
+  onClose?: Function;
 };
 
 interface ModalRef {

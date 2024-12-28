@@ -11,6 +11,11 @@ import { FieldWrapper } from "@/components/form/FieldWrapper";
 import { useAppLoading } from "@/contexts/loadingContext";
 import { bigintToResultView, etherToWei } from "@/utils/converter";
 import { Bounce, toast } from "react-toastify";
+import { LinkNewTab } from "@/components/base/LinkNewTab";
+import { format } from "react-string-format";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
+import { object, number, string, ObjectSchema } from "yup";
 
 type Props = {};
 
@@ -22,16 +27,26 @@ interface FormValues {
 const ClientAvailableGames = (props: Props) => {
   const { mainContractConnection, currentAccount } = useWeb3();
   const [data, setData] = useState<CoinTossGame.GameStructOutput[]>([]);
-  const modalRef = useRef(null);
+  const modalCreateGameRef = useRef(null);
+  const modalJoinGameRef = useRef(null);
+  const [fee, setFee] = useState(0);
+  const [gameSelected, setGameSelected] = useState<CoinTossGame.GameStructOutput | undefined>();
 
   const { showLoading, hideLoading, state } = useAppLoading();
-  console.log(state.isLoading);
 
-  const { handleSubmit, control, register, getValues, watch } = useForm<FormValues>({
+  const formSchema: yup.ObjectSchema<FormValues> = yup
+    .object({
+      isHeads: yup.boolean().required(),
+      betAmount: yup.number().required().min(0.0001, "Giá trị cược phải lớn hơn 0.0001"),
+    })
+    .required();
+
+  const { handleSubmit, control, register, reset, watch, formState } = useForm<FormValues>({
     defaultValues: {
       betAmount: 0,
       isHeads: true,
     },
+    resolver: yupResolver(formSchema),
   });
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
@@ -39,6 +54,8 @@ const ClientAvailableGames = (props: Props) => {
       showLoading();
       const weiValue = etherToWei(data.betAmount);
       const result = await (await mainContractConnection?.createGame.send(data.isHeads, { value: weiValue }))?.wait();
+
+      const hash = result?.hash;
 
       let gameId: any;
       if (result && result?.logs && result.logs.length > 0) {
@@ -56,9 +73,14 @@ const ClientAvailableGames = (props: Props) => {
       }
 
       refreshData();
-      toast.success(`Game ID ${gameId}, Tạo mới trò chơi thành công !`);
+      toast.success(
+        <div>
+          <div className="mb-2">{`Game ID ${gameId}, Tạo mới trò chơi thành công !`}</div>
+          <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", hash)}>Xem chi tiết</LinkNewTab>
+        </div>
+      );
       //@ts-ignore
-      modalRef.current?.close();
+      modalCreateGameRef.current?.close();
     } catch (error) {
       console.log(error);
       toast.error("Có lỗi xảy ra");
@@ -70,9 +92,14 @@ const ClientAvailableGames = (props: Props) => {
   const handleCancel = async (gameId: bigint) => {
     try {
       showLoading();
-      await (await mainContractConnection?.cancelGame(gameId))?.wait();
+      const result = await (await mainContractConnection?.cancelGame(gameId))?.wait();
       refreshData();
-      toast.success(`Game ID: ${gameId}, xoá game thành công !`);
+      toast.success(
+        <div>
+          <div className="mb-2">{`Game ID: ${gameId}, huỷ game thành công !`}</div>
+          <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", result?.hash)}>Xem chi tiết</LinkNewTab>
+        </div>
+      );
     } catch (error) {
       console.log(error);
       toast.error("Có lỗi xảy ra");
@@ -81,7 +108,19 @@ const ClientAvailableGames = (props: Props) => {
     }
   };
 
-  const handleJoin = (gameId: bigint) => {};
+  const handleJoin = async (gameId: bigint) => {
+    try {
+      showLoading();
+      const game = await mainContractConnection?.getGameById(gameId);
+      setGameSelected(game);
+      //@ts-ignore
+      modalJoinGameRef.current?.showModal();
+    } catch (error) {
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      hideLoading();
+    }
+  };
 
   const value = watch();
 
@@ -102,6 +141,15 @@ const ClientAvailableGames = (props: Props) => {
     refreshData();
   }, [mainContractConnection]);
 
+  useEffect(() => {
+    if (mainContractConnection) {
+      (async () => {
+        const fee = await mainContractConnection.feePercent();
+        setFee(+fee.toString());
+      })();
+    }
+  }, [mainContractConnection]);
+
   return (
     <>
       <div className="my-6">
@@ -109,17 +157,23 @@ const ClientAvailableGames = (props: Props) => {
           className="btn btn-info btn-sm"
           onClick={() => {
             //@ts-ignore
-            modalRef.current?.showModal();
+            modalCreateGameRef.current?.showModal();
           }}
         >
           Create new game
         </button>
       </div>
 
-      <Modal ref={modalRef} title="Tạo mới trò chơi">
+      <Modal
+        ref={modalCreateGameRef}
+        title="Tạo mới trò chơi"
+        onClose={() => {
+          reset();
+        }}
+      >
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-4">
-            <FieldWrapper label="Số lượng ETH">
+            <FieldWrapper label="Số lượng ETH" error={formState.errors.betAmount?.message}>
               <input
                 {...register("betAmount", { valueAsNumber: true })}
                 type="number"
@@ -140,6 +194,10 @@ const ClientAvailableGames = (props: Props) => {
                 control={control}
               />
             </FieldWrapper>
+
+            <FieldWrapper label="Người thắng được">
+              <div>{100 - fee}% tiền cược</div>
+            </FieldWrapper>
           </div>
 
           <div className="mt-5 flex justify-center">
@@ -148,6 +206,28 @@ const ClientAvailableGames = (props: Props) => {
             </button>
           </div>
         </form>
+      </Modal>
+
+      <Modal ref={modalJoinGameRef} title="Tham gia trò chơi">
+        <div className="flex flex-col gap-4">
+          <FieldWrapper label={"Host Address"}>{gameSelected?.player1}</FieldWrapper>
+
+          <FieldWrapper label={"Bạn chọn"}>
+            <Image
+              src={gameSelected?.player1Choice ? "/images/Coin-Tails.png" : "/images/Coin-Heads.png"}
+              alt={""}
+              width={64}
+              height={64}
+              className={`w-16 h-16 rounded-full border-2 border-info`}
+            />
+          </FieldWrapper>
+
+          <FieldWrapper label={"Số lượng ETH"}>{bigintToResultView(gameSelected?.betAmount)} ETH</FieldWrapper>
+
+          <FieldWrapper label="Người thắng được">
+            <div>{100 - fee}% tiền cược</div>
+          </FieldWrapper>
+        </div>
       </Modal>
 
       <div className="overflow-x-auto">

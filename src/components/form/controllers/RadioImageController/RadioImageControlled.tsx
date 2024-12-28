@@ -1,4 +1,5 @@
 import classNames from "classnames";
+import Image from "next/image";
 import React from "react";
 import { useController, UseControllerProps, Control } from "react-hook-form";
 
@@ -50,9 +51,12 @@ const RadioImageControlled = <T extends Record<string, any>>({
             }}
             checked={isChecked(field.value, option.value)}
           />
-          <img
+
+          <Image
             src={option.imageSrc}
             alt={option.alt}
+            width={64}
+            height={64}
             className={`w-16 h-16 rounded-full border-2 ${
               isChecked(field.value, option.value) ? "border-info" : "border-transparent"
             }`}
@@ -64,7 +68,7 @@ const RadioImageControlled = <T extends Record<string, any>>({
                 "text-sm " +
                 classNames({
                   "text-info font-bold": isChecked(field.value, option.value),
-                  "text-neutral-content": !isChecked(field.value, option.value)
+                  "text-neutral-content": !isChecked(field.value, option.value),
                 })
               }
             >

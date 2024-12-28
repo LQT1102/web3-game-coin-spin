@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@hookform/resolvers": "^3.9.1",
     "classnames": "^2.5.1",
     "daisyui": "^4.12.22",
     "ethers": "^6.13.4",
@@ -20,8 +21,10 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
+    "react-string-format": "^1.2.0",
     "react-toastify": "^11.0.2",
-    "theme-change": "^2.5.0"
+    "theme-change": "^2.5.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@typechain/ethers-v6": "^0.5.1",
