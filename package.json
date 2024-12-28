@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate-contract-typechain": "typechain --target=ethers-v6 'src/abi/*.json'"
+    "abi-type-gen": "typechain --target=ethers-v6 'src/abi/*.json'"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -20,6 +20,7 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.54.2",
+    "react-toastify": "^11.0.2",
     "theme-change": "^2.5.0"
   },
   "devDependencies": {

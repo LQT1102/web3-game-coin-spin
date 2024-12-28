@@ -187,7 +187,13 @@ const _abi = [
       },
     ],
     name: "createGame",
-    outputs: [],
+    outputs: [
+      {
+        internalType: "uint256",
+        name: "",
+        type: "uint256",
+      },
+    ],
     stateMutability: "payable",
     type: "function",
   },

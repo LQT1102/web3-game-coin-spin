@@ -9,7 +9,8 @@ import RadioImageControlled from "@/components/form/controllers/RadioImageContro
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FieldWrapper } from "@/components/form/FieldWrapper";
 import { useAppLoading } from "@/contexts/loadingContext";
-import { etherToWei } from "@/utils/converter";
+import { bigintToResultView, etherToWei } from "@/utils/converter";
+import { Bounce, toast } from "react-toastify";
 
 type Props = {};
 
@@ -37,19 +38,50 @@ const ClientAvailableGames = (props: Props) => {
     try {
       showLoading();
       const weiValue = etherToWei(data.betAmount);
-      await (await mainContractConnection?.createGame.send(data.isHeads, { value: weiValue }))?.wait();
-      refreshData();
+      const result = await (await mainContractConnection?.createGame.send(data.isHeads, { value: weiValue }))?.wait();
 
+      let gameId: any;
+      if (result && result?.logs && result.logs.length > 0) {
+        for (const log of result.logs) {
+          try {
+            const event = mainContractConnection?.interface.parseLog(log);
+            if (event && event.name === "GameCreated") {
+              gameId = event.args.gameId;
+              console.log("New game created with ID:", gameId);
+            }
+          } catch (error) {
+            console.log("Error when parse event log", error);
+          }
+        }
+      }
+
+      refreshData();
+      toast.success(`Game ID ${gameId}, Tạo mới trò chơi thành công !`);
       //@ts-ignore
       modalRef.current?.close();
     } catch (error) {
       console.log(error);
+      toast.error("Có lỗi xảy ra");
     } finally {
-      setTimeout(() => {
-        hideLoading();
-      }, 1000);
+      hideLoading();
     }
   };
+
+  const handleCancel = async (gameId: bigint) => {
+    try {
+      showLoading();
+      await (await mainContractConnection?.cancelGame(gameId))?.wait();
+      refreshData();
+      toast.success(`Game ID: ${gameId}, xoá game thành công !`);
+    } catch (error) {
+      console.log(error);
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const handleJoin = (gameId: bigint) => {};
 
   const value = watch();
 
@@ -119,7 +151,12 @@ const ClientAvailableGames = (props: Props) => {
       </Modal>
 
       <div className="overflow-x-auto">
-        <TableAvailableGames data={data} currentAccount={currentAccount?.account?.address || ""} />
+        <TableAvailableGames
+          data={data}
+          currentAccount={currentAccount?.account?.address || ""}
+          onClickCancel={handleCancel}
+          onClickJoin={handleJoin}
+        />
       </div>
     </>
   );

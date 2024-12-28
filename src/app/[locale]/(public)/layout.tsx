@@ -1,9 +1,7 @@
-import { Header } from "@/components/layouts/Header";
-import Image from "next/image";
-import Link from "next/link";
-import dynamicImport from "next/dynamic";
-import { HomeTab } from "@/components/features/HomeTab";
 import { AppLoading } from "@/components/base/AppLoading";
+import { AppToastContainer } from "@/components/base/AppToastContainer";
+import { HomeTab } from "@/components/features/HomeTab";
+import { Header } from "@/components/layouts/Header";
 
 export default async function PublicLayout({
   children,
@@ -19,19 +17,12 @@ export default async function PublicLayout({
       {/* lg */}
 
       <HomeTab />
-      {/* <div role="tablist" className="tabs tabs-bordered tabs-lg mt-10">
-        <a role="tab" className="tab !border-info !border-opacity-80">
-          Phòng game
-        </a>
-        <a role="tab" className="tab">
-          Lịch sử
-        </a>
-      </div> */}
-      {/* <Link href={"/foo"}>Go Foo</Link>
-      <Link href={"/bar"}>Go Bar</Link> */}
+
       {children}
 
       <AppLoading />
+
+      <AppToastContainer />
     </div>
   );
 }

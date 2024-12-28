@@ -10,7 +10,7 @@ const AppLoading = (props: Props) => {
   if (!state.isLoading) return <></>;
   return (
     <div className="min-h-screen w-full bg-base-100 bg-opacity-70 cursor-wait absolute top-0 left-0 z-[99999] flex justify-center items-center">
-      <span className="loading loading-infinity loading-lg"></span>
+      <span className="loading loading-infinity w-20 text-info"></span>
     </div>
   );
 };

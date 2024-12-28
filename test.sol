@@ -71,7 +71,7 @@ contract CoinTossGame {
         owner = msg.sender;
     }
 
-    function createGame(bool _choice) external payable {
+    function createGame(bool _choice) external payable returns (uint256){
         require(msg.value > 0, "Bet amount must be greater than 0");
 
         uint256 gameId = nextGameId;
@@ -93,6 +93,8 @@ contract CoinTossGame {
         waitingGameIds.push(gameId);
 
         emit GameCreated(gameId, msg.sender, msg.value, _choice, feePercent);
+        
+        return gameId;
     }
 
     function joinGame(uint256 _gameId) external payable nonReentrant {
@@ -121,16 +123,6 @@ contract CoinTossGame {
         uint256 winningAmount = game.betAmount + (game.betAmount - fee);
 
         // Xóa game khỏi danh sách chờ
-        for (uint i = 0; i < waitingGameIds.length; i++) {
-            if (waitingGameIds[i] == _gameId) {
-                waitingGameIds[i] = waitingGameIds[waitingGameIds.length - 1];
-                waitingGameIds.pop();
-                break;
-            }
-            unchecked {
-                i++;
-            }
-        }
         waitingGames[_gameId] = false;
 
         emit GameJoined(_gameId, msg.sender);
@@ -145,16 +137,6 @@ contract CoinTossGame {
         game.status = GameStatus.Canceled;
 
         // Xóa game khỏi danh sách chờ
-        for (uint i = 0; i < waitingGameIds.length; i++) {
-            if (waitingGameIds[i] == _gameId) {
-                waitingGameIds[i] = waitingGameIds[waitingGameIds.length - 1];
-                waitingGameIds.pop();
-                break;
-            }
-            unchecked {
-                i++;
-            }
-        }
         waitingGames[_gameId] = false;
 
         payable(game.player1).transfer(game.betAmount);
@@ -177,7 +159,20 @@ contract CoinTossGame {
     }
 
     function getWaitingGames() external view returns (uint256[] memory) {
-        return waitingGameIds;
+        uint length = waitingGameIds.length;
+        uint256[] memory tempGames = new uint256[](length);
+        uint counter = 0;
+        for(uint i = 0; i < length; i++){
+            if(waitingGames[waitingGameIds[i]]){
+            tempGames[counter] = waitingGameIds[i];
+            counter++;
+            }
+        }
+        uint256[] memory _waitingGames = new uint256[](counter);
+        for(uint i = 0; i < counter; i++){
+            _waitingGames[i] = tempGames[i];
+        }
+        return _waitingGames;
     }
 
     function setFeePercent(uint256 _newFeePercent) external onlyOwner {

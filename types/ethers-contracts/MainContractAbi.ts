@@ -343,7 +343,7 @@ export interface MainContractAbi extends BaseContract {
     "nonpayable"
   >;
 
-  createGame: TypedContractMethod<[_choice: boolean], [void], "payable">;
+  createGame: TypedContractMethod<[_choice: boolean], [bigint], "payable">;
 
   feePercent: TypedContractMethod<[], [bigint], "view">;
 
@@ -415,7 +415,7 @@ export interface MainContractAbi extends BaseContract {
   ): TypedContractMethod<[_gameId: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "createGame"
-  ): TypedContractMethod<[_choice: boolean], [void], "payable">;
+  ): TypedContractMethod<[_choice: boolean], [bigint], "payable">;
   getFunction(
     nameOrSignature: "feePercent"
   ): TypedContractMethod<[], [bigint], "view">;

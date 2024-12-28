@@ -6,9 +6,11 @@ import { CoinTossGame } from "@root/types/ethers-contracts/MainContractAbi";
 type Props = {
   data: CoinTossGame.GameStructOutput[];
   currentAccount: string;
+  onClickJoin: Function;
+  onClickCancel: Function;
 };
 
-const TableAvailableGames = ({ data, currentAccount }: Props) => {
+const TableAvailableGames = ({ data, currentAccount, onClickCancel, onClickJoin }: Props) => {
   const checkCanJoin = (address: string) => {
     return address !== currentAccount;
   };
@@ -39,9 +41,23 @@ const TableAvailableGames = ({ data, currentAccount }: Props) => {
                 <td>{bigintToResultView(game.betAmount)} ETH</td>
                 <td>
                   {checkCanJoin(game.player1) ? (
-                    <button className="btn btn-success btn-sm h-[20px]">Join</button>
+                    <button
+                      className="btn btn-success btn-sm h-[20px]"
+                      onClick={() => {
+                        onClickJoin(game.gameId);
+                      }}
+                    >
+                      Join
+                    </button>
                   ) : (
-                    <button className="btn btn-error btn-sm h-[20px]">Cancel</button>
+                    <button
+                      className="btn btn-error btn-sm h-[20px]"
+                      onClick={() => {
+                        onClickCancel(game.gameId);
+                      }}
+                    >
+                      Cancel
+                    </button>
                   )}
                 </td>
               </tr>

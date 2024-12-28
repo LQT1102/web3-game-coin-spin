@@ -73,7 +73,7 @@
   {
     "inputs": [{ "internalType": "bool", "name": "_choice", "type": "bool" }],
     "name": "createGame",
-    "outputs": [],
+    "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
     "stateMutability": "payable",
     "type": "function"
   },
