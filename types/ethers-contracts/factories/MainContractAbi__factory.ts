@@ -145,7 +145,7 @@ const _abi = [
       {
         indexed: true,
         internalType: "address",
-        name: "player2",
+        name: "player",
         type: "address",
       },
     ],

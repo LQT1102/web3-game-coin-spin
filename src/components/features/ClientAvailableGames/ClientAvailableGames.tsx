@@ -16,6 +16,8 @@ import { format } from "react-string-format";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { object, number, string, ObjectSchema } from "yup";
+import { CoinSpinning } from "@/components/base/CoinSpinning";
+import classNames from "classnames";
 
 type Props = {};
 
@@ -25,12 +27,17 @@ interface FormValues {
 }
 
 const ClientAvailableGames = (props: Props) => {
-  const { mainContractConnection, currentAccount } = useWeb3();
+  const { mainContractConnection, currentAccount, refreshCurrentAccount } = useWeb3();
   const [data, setData] = useState<CoinTossGame.GameStructOutput[]>([]);
   const modalCreateGameRef = useRef(null);
   const modalJoinGameRef = useRef(null);
+  const modalCoinSpinningRef = useRef(null);
   const [fee, setFee] = useState(0);
   const [gameSelected, setGameSelected] = useState<CoinTossGame.GameStructOutput | undefined>();
+  const [result, setResult] = useState<{ side: Nullable<"Heads" | "Tails">; winner: string }>({
+    side: null,
+    winner: "",
+  });
 
   const { showLoading, hideLoading, state } = useAppLoading();
 
@@ -75,10 +82,13 @@ const ClientAvailableGames = (props: Props) => {
       refreshData();
       toast.success(
         <div>
-          <div className="mb-2">{`Game ID ${gameId}, Tạo mới trò chơi thành công !`}</div>
-          <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", hash)}>Xem chi tiết</LinkNewTab>
+          <div className="mb-2">{`Tạo mới trò chơi thành công !`}</div>
+          <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", hash)}>
+            {`Game ID ${gameId}, Xem chi tiết`}
+          </LinkNewTab>
         </div>
       );
+      refreshCurrentAccount();
       //@ts-ignore
       modalCreateGameRef.current?.close();
     } catch (error) {
@@ -96,13 +106,17 @@ const ClientAvailableGames = (props: Props) => {
       refreshData();
       toast.success(
         <div>
-          <div className="mb-2">{`Game ID: ${gameId}, huỷ game thành công !`}</div>
-          <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", result?.hash)}>Xem chi tiết</LinkNewTab>
+          <div className="mb-2">{`Huỷ game thành công !`}</div>
+          <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", result?.hash)}>
+            {`Game ID: ${gameId}` + ", xem chi tiết"}
+          </LinkNewTab>
         </div>
       );
+      refreshCurrentAccount();
     } catch (error) {
       console.log(error);
       toast.error("Có lỗi xảy ra");
+      hideLoading();
     } finally {
       hideLoading();
     }
@@ -137,6 +151,72 @@ const ClientAvailableGames = (props: Props) => {
       setData(games);
     }
   };
+
+  const handleConfirmJoin = async () => {
+    try {
+      if (!gameSelected) return;
+      showLoading();
+
+      //Show hiệu ứng xoay
+
+      const transaction = await mainContractConnection?.joinGame.send(gameSelected?.gameId, {
+        value: gameSelected.betAmount,
+      });
+
+      hideLoading();
+      //@ts-ignore
+      modalJoinGameRef.current?.close();
+
+      //@ts-ignore
+      modalCoinSpinningRef?.current?.showModal();
+
+      const result = await transaction?.wait();
+
+      let winnerAddress = "";
+
+      if (result && result?.logs && result.logs.length > 0) {
+        for (const log of result.logs) {
+          try {
+            const event = mainContractConnection?.interface.parseLog(log);
+            if (event && event.name === "GameFinished") {
+              const { gameId, winner, winningAmount } = event.args;
+              winnerAddress = winner;
+            }
+          } catch (error) {
+            console.log("Error when parse event log", error);
+          }
+        }
+      }
+
+      debugger;
+      //Nếu người join win thì kết quả chính là ngược so với host address
+      if (winnerAddress === currentAccount?.account?.address) {
+        setResult({
+          side: gameSelected.player1Choice ? "Tails" : "Heads",
+          winner: winnerAddress,
+        });
+      } else {
+        setResult({ side: gameSelected.player1Choice ? "Heads" : "Tails", winner: winnerAddress });
+      }
+
+      refreshData();
+    } catch (error) {
+      console.log(error);
+
+      hideLoading();
+      //@ts-ignore
+      modalCoinSpinningRef?.current?.close();
+    } finally {
+    }
+  };
+
+  const handleCloseCoinSpinning = () => {
+    //@ts-ignore
+    modalCoinSpinningRef?.current?.close();
+    setGameSelected(undefined);
+    setResult({ side: null, winner: "" });
+  };
+
   useEffect(() => {
     refreshData();
   }, [mainContractConnection]);
@@ -149,6 +229,14 @@ const ClientAvailableGames = (props: Props) => {
       })();
     }
   }, [mainContractConnection]);
+
+  // useEffect(() => {
+  //   // @ts-ignore
+  //   modalCoinSpinningRef?.current?.showModal();
+  //   setTimeout(() => {
+  //     setResult("Tails");
+  //   }, 3000);
+  // }, []);
 
   return (
     <>
@@ -208,18 +296,29 @@ const ClientAvailableGames = (props: Props) => {
         </form>
       </Modal>
 
-      <Modal ref={modalJoinGameRef} title="Tham gia trò chơi">
-        <div className="flex flex-col gap-4">
-          <FieldWrapper label={"Host Address"}>{gameSelected?.player1}</FieldWrapper>
+      <Modal
+        ref={modalCoinSpinningRef}
+        closeOnClickOutside={false}
+        showBtnClose={false}
+        title={`Game ID: ${gameSelected?.gameId}`}
+      >
+        <div className="flex justify-center">
+          <CoinSpinning result={result.side as any} />
+        </div>
 
-          <FieldWrapper label={"Bạn chọn"}>
-            <Image
-              src={gameSelected?.player1Choice ? "/images/Coin-Tails.png" : "/images/Coin-Heads.png"}
-              alt={""}
-              width={64}
-              height={64}
-              className={`w-16 h-16 rounded-full border-2 border-info`}
-            />
+        <div className="flex flex-col gap-4">
+          <FieldWrapper label={"Bạn đã chọn"}>
+            <div className="flex gap-2 items-center">
+              <Image
+                src={gameSelected?.player1Choice ? "/images/Coin-Tails.png" : "/images/Coin-Heads.png"}
+                alt={""}
+                width={64}
+                height={64}
+                className={`w-16 h-16 rounded-full border-2 border-info`}
+              />
+
+              <div>{gameSelected?.player1Choice ? "Mặt Úp" : "Mặt ngửa"}</div>
+            </div>
           </FieldWrapper>
 
           <FieldWrapper label={"Số lượng ETH"}>{bigintToResultView(gameSelected?.betAmount)} ETH</FieldWrapper>
@@ -227,6 +326,59 @@ const ClientAvailableGames = (props: Props) => {
           <FieldWrapper label="Người thắng được">
             <div>{100 - fee}% tiền cược</div>
           </FieldWrapper>
+
+          {!!result.winner && (
+            <FieldWrapper label="Kết quả">
+              <div
+                className={classNames({
+                  "text-success": result.winner === currentAccount?.account?.address,
+                  "text-error": result.winner !== currentAccount?.account?.address,
+                })}
+              >
+                {result.winner === currentAccount?.account?.address ? "Thắng" : "Thua"}
+              </div>
+            </FieldWrapper>
+          )}
+        </div>
+
+        {!!result.winner && (
+          <div className="mt-5 flex justify-center">
+            <button className="btn btn-info" onClick={handleCloseCoinSpinning}>
+              Xác nhận
+            </button>
+          </div>
+        )}
+      </Modal>
+
+      <Modal ref={modalJoinGameRef} title="Tham gia trò chơi">
+        <div className="flex flex-col gap-4">
+          <FieldWrapper label={"Host Address"}>{gameSelected?.player1}</FieldWrapper>
+
+          <FieldWrapper label={"Bạn sẽ chọn"}>
+            <div className="flex gap-2 items-center">
+              <Image
+                src={gameSelected?.player1Choice ? "/images/Coin-Tails.png" : "/images/Coin-Heads.png"}
+                alt={""}
+                width={64}
+                height={64}
+                className={`w-16 h-16 rounded-full border-2 border-info`}
+              />
+
+              <div>{gameSelected?.player1Choice ? "Mặt Úp" : "Mặt ngửa"}</div>
+            </div>
+          </FieldWrapper>
+
+          <FieldWrapper label={"Số lượng ETH"}>{bigintToResultView(gameSelected?.betAmount)} ETH</FieldWrapper>
+
+          <FieldWrapper label="Người thắng được">
+            <div>{100 - fee}% tiền cược</div>
+          </FieldWrapper>
+        </div>
+
+        <div className="mt-5 flex justify-center">
+          <button className="btn btn-info" type="submit" onClick={handleConfirmJoin}>
+            Tham gia
+          </button>
         </div>
       </Modal>
 

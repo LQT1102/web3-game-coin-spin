@@ -51,7 +51,7 @@
     "anonymous": false,
     "inputs": [
       { "indexed": true, "internalType": "uint256", "name": "gameId", "type": "uint256" },
-      { "indexed": true, "internalType": "address", "name": "player2", "type": "address" }
+      { "indexed": true, "internalType": "address", "name": "player", "type": "address" }
     ],
     "name": "GameJoined",
     "type": "event"

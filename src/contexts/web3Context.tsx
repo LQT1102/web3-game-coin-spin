@@ -31,6 +31,7 @@ interface Web3ContextProps {
   currentAccount: Nullable<CurrentAccount>;
   status: Nullable<"OK" | "ERROR">;
   mainContractConnection: Nullable<MainContractAbi>;
+  refreshCurrentAccount: Function;
 }
 
 const Web3Context = createContext<Web3ContextProps>({
@@ -41,6 +42,7 @@ const Web3Context = createContext<Web3ContextProps>({
   currentAccount: null,
   status: null,
   mainContractConnection: null,
+  refreshCurrentAccount: () => {},
 });
 
 // Hook để sử dụng Web3Context
@@ -72,6 +74,13 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
     const mainContract = MainContractAbi__factory.connect(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "", signer);
     setMainContractConnection(mainContract);
     // Lấy số dư của tài khoản
+    const balance = await provider.getBalance(account);
+    setCurrentAccount({ account, balance });
+  };
+
+  const refreshCurrentAccount = async () => {
+    if (!accounts || !provider) return;
+    const account = accounts[0];
     const balance = await provider.getBalance(account);
     setCurrentAccount({ account, balance });
   };
@@ -153,7 +162,16 @@ export const Web3Provider = ({ children }: { children: ReactNode }) => {
 
   return (
     <Web3Context.Provider
-      value={{ provider, signer, accounts, network, currentAccount, status, mainContractConnection }}
+      value={{
+        provider,
+        signer,
+        accounts,
+        network,
+        currentAccount,
+        status,
+        mainContractConnection,
+        refreshCurrentAccount,
+      }}
     >
       {children}
     </Web3Context.Provider>

@@ -48,7 +48,7 @@ contract CoinTossGame {
         bool player1Choice,
         uint256 feePercent
     );
-    event GameJoined(uint256 indexed gameId, address indexed player2);
+    event GameJoined(uint256 indexed gameId, address indexed player);
     event GameFinished(
         uint256 indexed gameId,
         address indexed winner,
@@ -93,7 +93,7 @@ contract CoinTossGame {
         waitingGameIds.push(gameId);
 
         emit GameCreated(gameId, msg.sender, msg.value, _choice, feePercent);
-        
+        emit GameJoined(gameId, msg.sender);
         return gameId;
     }
 

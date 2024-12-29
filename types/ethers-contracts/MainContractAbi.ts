@@ -276,11 +276,11 @@ export namespace GameFinishedEvent {
 }
 
 export namespace GameJoinedEvent {
-  export type InputTuple = [gameId: BigNumberish, player2: AddressLike];
-  export type OutputTuple = [gameId: bigint, player2: string];
+  export type InputTuple = [gameId: BigNumberish, player: AddressLike];
+  export type OutputTuple = [gameId: bigint, player: string];
   export interface OutputObject {
     gameId: bigint;
-    player2: string;
+    player: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;

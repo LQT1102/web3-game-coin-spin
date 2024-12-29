@@ -42,7 +42,7 @@ const TableAvailableGames = ({ data, currentAccount, onClickCancel, onClickJoin 
                 <td>
                   {checkCanJoin(game.player1) ? (
                     <button
-                      className="btn btn-success btn-sm h-[20px]"
+                      className="btn btn-info btn-sm h-[20px]"
                       onClick={() => {
                         onClickJoin(game.gameId);
                       }}

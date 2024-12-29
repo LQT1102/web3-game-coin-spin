@@ -6,6 +6,8 @@ type Props = {
   children?: ReactNode;
   id?: string;
   onClose?: Function;
+  showBtnClose?: boolean;
+  closeOnClickOutside?: boolean;
 };
 
 interface ModalRef {
@@ -13,39 +15,43 @@ interface ModalRef {
   close: () => void;
 }
 
-const Modal = forwardRef<ModalRef, Props>(({ children, id = "modal", title, onClose }, ref) => {
-  const dialogRef = useRef<HTMLDialogElement>(null);
+const Modal = forwardRef<ModalRef, Props>(
+  ({ children, id = "modal", title, onClose, showBtnClose = true, closeOnClickOutside = true }, ref) => {
+    const dialogRef = useRef<HTMLDialogElement>(null);
 
-  useImperativeHandle(ref, () => ({
-    showModal: () => dialogRef.current?.show(), //show thay cho show modal để không bị đưa lên toplayer
-    close: () => dialogRef.current?.close(),
-  }));
+    useImperativeHandle(ref, () => ({
+      showModal: () => dialogRef.current?.show(), //show thay cho show modal để không bị đưa lên toplayer
+      close: () => dialogRef.current?.close(),
+    }));
 
-  useEffect(() => {
-    //@ts-ignore
-    dialogRef?.current?.addEventListener("close", () => onClose && onClose());
-  }, []);
+    useEffect(() => {
+      //@ts-ignore
+      dialogRef?.current?.addEventListener("close", () => onClose && onClose());
+    }, []);
 
-  return (
-    <dialog ref={dialogRef} id={id} className="modal outline-none sm:modal-middle">
-      <div className="modal-box modal-box-custom">
-        <button
-          className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-          onClick={() => {
-            dialogRef.current?.close();
-          }}
-        >
-          ✕
-        </button>
+    return (
+      <dialog ref={dialogRef} id={id} className="modal outline-none sm:modal-middle">
+        <div className="modal-box modal-box-custom">
+          {showBtnClose && (
+            <button
+              className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+              onClick={() => {
+                dialogRef.current?.close();
+              }}
+            >
+              ✕
+            </button>
+          )}
 
-        {!!title && <h3 className="font-bold text-xl mb-5 text-neutral-content">{title}</h3>}
-        {children}
-      </div>
-      {/* close the modal when clicked outside */}
-      <form method="dialog" className="modal-backdrop bg-base-100 bg-opacity-70">
-        <button></button>
-      </form>
-    </dialog>
-  );
-});
+          {!!title && <h3 className="font-bold text-xl mb-5 text-neutral-content">{title}</h3>}
+          {children}
+        </div>
+        {/* close the modal when clicked outside */}
+        <form method="dialog" className="modal-backdrop bg-base-100 bg-opacity-70">
+          {closeOnClickOutside && <button></button>}
+        </form>
+      </dialog>
+    );
+  }
+);
 export default Modal;
