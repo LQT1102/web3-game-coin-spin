@@ -1,25 +1,25 @@
 "use client";
 
-import { formatAddressView } from "@/utils/converter";
 import { copyToClipboard } from "@/utils/helper";
 import { DocumentDuplicateIcon } from "@heroicons/react/24/outline";
-import React, { HTMLAttributes, useState } from "react";
+import { ReactNode, useState } from "react";
 
 type Props = {
-  address: string;
   className?: string;
+  children: ReactNode;
+  stringValue: Nullable<string>;
 };
 
-const Address = ({ address, className }: Props) => {
+const CopyWrapper = ({ className, children, stringValue }: Props) => {
   const [copyTtTitle, setCopyTtTitle] = useState("copy");
   return (
     <div className={"flex gap-1 " + className}>
-      <span>{formatAddressView(address)}</span>
+      {children}
       <div className="tooltip" data-tip={copyTtTitle}>
         <span
           className="cursor-pointer"
           onClick={async () => {
-            await copyToClipboard(address);
+            await copyToClipboard(stringValue);
             setCopyTtTitle("copied");
           }}
           onMouseLeave={() => {
@@ -35,4 +35,4 @@ const Address = ({ address, className }: Props) => {
   );
 };
 
-export default Address;
+export default CopyWrapper;

@@ -1,8 +1,9 @@
 "use client";
 
-import Address from "@/components/base/Address/Address";
+import { CopyWrapper } from "@/components/base/CopyWrapper";
 import { useWeb3 } from "@/contexts/web3Context";
-import { bigintToResultView, formatAddressView } from "@/utils/converter";
+import { useClientTranslations } from "@/libs/i18n-client";
+import { weiToETH, formatAddressView } from "@/utils/converter";
 import { BanknotesIcon, ExclamationTriangleIcon, WalletIcon } from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Image from "next/image";
@@ -19,6 +20,7 @@ type Props = {};
 
 const Header = (props: Props) => {
   const { currentAccount, status } = useWeb3();
+  const { t } = useClientTranslations();
 
   console.log(status);
 
@@ -26,9 +28,7 @@ const Header = (props: Props) => {
     return (
       <div className="w-full flex flex-col gap-4 justify-center items-center">
         <ExclamationTriangleIcon width={80} className="text-red-500" />
-        <div className="text-3xl text-red-500">
-          Đã xảy ra lỗi, vui lòng kiểm tra lại trạng thái kết nối với mạng và ví của bạn
-        </div>
+        <div className="text-3xl text-red-500">{t("GeneralErrorNetwork")}</div>
       </div>
     );
   }
@@ -40,12 +40,14 @@ const Header = (props: Props) => {
       <div className="flex-1 min-w-0 flex flex-col gap-2">
         <div className="flex gap-2">
           <WalletIcon width={24} className="text-info" />
-          <Address address={currentAccount?.account?.address || ""} />
+          <CopyWrapper stringValue={currentAccount?.account?.address}>
+            {formatAddressView(currentAccount?.account?.address || "")}
+          </CopyWrapper>
         </div>
 
         <div className="flex gap-3">
           <BanknotesIcon width={24} className="text-info" />
-          <span>{bigintToResultView(currentAccount?.balance)} ETH</span>
+          <span>{weiToETH(currentAccount?.balance)} ETH</span>
         </div>
       </div>
 

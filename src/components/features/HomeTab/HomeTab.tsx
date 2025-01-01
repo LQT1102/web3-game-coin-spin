@@ -1,4 +1,5 @@
 "use client";
+import { useClientTranslations } from "@/libs/i18n-client";
 import classNames from "classnames";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -7,6 +8,7 @@ import React from "react";
 type Props = {};
 
 const HomeTab = (props: Props) => {
+  const { t } = useClientTranslations();
   const pathname = usePathname();
 
   const isActivePath = (path: string) => {
@@ -26,7 +28,7 @@ const HomeTab = (props: Props) => {
           })
         }
       >
-        <h2>Tham gia ngay</h2>
+        <h2>{t("JoinNow")}</h2>
       </Link>
       <Link
         role="tab"
@@ -39,7 +41,7 @@ const HomeTab = (props: Props) => {
           })
         }
       >
-        <h2 className="">Lịch sử</h2>
+        <h2 className="">{t("History")}</h2>
       </Link>
     </div>
   );

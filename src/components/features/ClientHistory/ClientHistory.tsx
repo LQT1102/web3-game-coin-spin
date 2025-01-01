@@ -7,10 +7,12 @@ import { LinkNewTab } from "@/components/base/LinkNewTab";
 import { toast } from "react-toastify";
 import { format } from "react-string-format";
 import { useAppLoading } from "@/contexts/loadingContext";
+import { useClientTranslations } from "@/libs/i18n-client";
 
 type Props = {};
 
 const ClientHistory = (props: Props) => {
+  const { t } = useClientTranslations();
   const { mainContractConnection, currentAccount, refreshCurrentAccount } = useWeb3();
   const [data, setData] = useState<CoinTossGame.GameStructOutput[]>([]);
   const { showLoading, hideLoading, state } = useAppLoading();
@@ -43,16 +45,16 @@ const ClientHistory = (props: Props) => {
       refreshData();
       toast.success(
         <div>
-          <div className="mb-2">{`Huỷ game thành công !`}</div>
+          <div className="mb-2">{`${t("CancelGameSuccess")}`}</div>
           <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", result?.hash)}>
-            {`Game ID: ${gameId},` + ", xem chi tiết"}
+            {`Game ID: ${gameId}` + `, ${t("ViewDetail")}`}
           </LinkNewTab>
         </div>
       );
       refreshCurrentAccount();
     } catch (error) {
       console.log(error);
-      toast.error("Có lỗi xảy ra");
+      toast.error(t("ErrorOccurred"));
       hideLoading();
     } finally {
       hideLoading();
@@ -65,9 +67,9 @@ const ClientHistory = (props: Props) => {
       const result = await (await mainContractConnection?.claimReward(gameId))?.wait();
       toast.success(
         <div>
-          <div className="mb-2">{`Nhận thưởng thành công !`}</div>
+          <div className="mb-2">{t("GetRewardSuccess")}</div>
           <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", result?.hash)}>
-            {`Game ID: ${gameId}` + ", xem chi tiết"}
+            {`Game ID: ${gameId}` + `, ${t("ViewDetail")}`}
           </LinkNewTab>
         </div>
       );

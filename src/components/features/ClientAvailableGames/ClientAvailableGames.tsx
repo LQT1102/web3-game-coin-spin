@@ -9,7 +9,7 @@ import RadioImageControlled from "@/components/form/controllers/RadioImageContro
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FieldWrapper } from "@/components/form/FieldWrapper";
 import { useAppLoading } from "@/contexts/loadingContext";
-import { bigintToResultView, etherToWei } from "@/utils/converter";
+import { bigIntToNumber, weiToETH, etherToWei } from "@/utils/converter";
 import { Bounce, toast } from "react-toastify";
 import { LinkNewTab } from "@/components/base/LinkNewTab";
 import { format } from "react-string-format";
@@ -18,6 +18,7 @@ import * as yup from "yup";
 import { object, number, string, ObjectSchema } from "yup";
 import { CoinSpinning } from "@/components/base/CoinSpinning";
 import classNames from "classnames";
+import { useClientTranslations } from "@/libs/i18n-client";
 
 type Props = {};
 
@@ -27,6 +28,7 @@ interface FormValues {
 }
 
 const ClientAvailableGames = (props: Props) => {
+  const { t } = useClientTranslations();
   const { mainContractConnection, currentAccount, refreshCurrentAccount } = useWeb3();
   const [data, setData] = useState<CoinTossGame.GameStructOutput[]>([]);
   const modalCreateGameRef = useRef(null);
@@ -44,7 +46,10 @@ const ClientAvailableGames = (props: Props) => {
   const formSchema: yup.ObjectSchema<FormValues> = yup
     .object({
       isHeads: yup.boolean().required(),
-      betAmount: yup.number().required().min(0.0001, "Giá trị cược phải lớn hơn 0.0001"),
+      betAmount: yup
+        .number()
+        .required()
+        .min(0.0001, t("ErrorValidateBetAmount", { amount: "0.0001" })),
     })
     .required();
 
@@ -82,9 +87,9 @@ const ClientAvailableGames = (props: Props) => {
       refreshData();
       toast.success(
         <div>
-          <div className="mb-2">{`Tạo mới trò chơi thành công !`}</div>
+          <div className="mb-2">{t("CreateGameSuccess")}</div>
           <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", hash)}>
-            {`Game ID ${gameId}, Xem chi tiết`}
+            {`Game ID ${gameId}, ${t("ViewDetail")}`}
           </LinkNewTab>
         </div>
       );
@@ -93,7 +98,7 @@ const ClientAvailableGames = (props: Props) => {
       modalCreateGameRef.current?.close();
     } catch (error) {
       console.log(error);
-      toast.error("Có lỗi xảy ra");
+      toast.error(t("ErrorOccurred"));
     } finally {
       hideLoading();
     }
@@ -106,16 +111,16 @@ const ClientAvailableGames = (props: Props) => {
       refreshData();
       toast.success(
         <div>
-          <div className="mb-2">{`Huỷ game thành công !`}</div>
+          <div className="mb-2">{`${t("CancelGameSuccess")}`}</div>
           <LinkNewTab href={format(process.env.NEXT_PUBLIC_TX_DETAIL_URL || "", result?.hash)}>
-            {`Game ID: ${gameId}` + ", xem chi tiết"}
+            {`Game ID: ${gameId}` + `, ${t("ViewDetail")}`}
           </LinkNewTab>
         </div>
       );
       refreshCurrentAccount();
     } catch (error) {
       console.log(error);
-      toast.error("Có lỗi xảy ra");
+      toast.error(t("ErrorOccurred"));
       hideLoading();
     } finally {
       hideLoading();
@@ -130,7 +135,7 @@ const ClientAvailableGames = (props: Props) => {
       //@ts-ignore
       modalJoinGameRef.current?.showModal();
     } catch (error) {
-      toast.error("Có lỗi xảy ra");
+      toast.error(t("ErrorOccurred"));
     } finally {
       hideLoading();
     }
@@ -188,7 +193,6 @@ const ClientAvailableGames = (props: Props) => {
         }
       }
 
-      debugger;
       //Nếu người join win thì kết quả chính là ngược so với host address
       if (winnerAddress === currentAccount?.account?.address) {
         setResult({
@@ -225,7 +229,7 @@ const ClientAvailableGames = (props: Props) => {
     if (mainContractConnection) {
       (async () => {
         const fee = await mainContractConnection.feePercent();
-        setFee(+fee.toString());
+        setFee(bigIntToNumber(fee));
       })();
     }
   }, [mainContractConnection]);
@@ -248,49 +252,54 @@ const ClientAvailableGames = (props: Props) => {
             modalCreateGameRef.current?.showModal();
           }}
         >
-          Create new game
+          {t("CreateNewGame")}
         </button>
       </div>
 
       <Modal
         ref={modalCreateGameRef}
-        title="Tạo mới trò chơi"
+        title={t("CreateNewGame")}
         onClose={() => {
           reset();
         }}
       >
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="flex flex-col gap-4">
-            <FieldWrapper label="Số lượng ETH" error={formState.errors.betAmount?.message}>
+            <FieldWrapper label={t("ETH_Amount")} error={formState.errors.betAmount?.message}>
               <input
                 {...register("betAmount", { valueAsNumber: true })}
                 type="number"
                 step={0.0000001}
-                placeholder="Nhập số lượng ETH"
+                placeholder={t("InputETH_Amount")}
                 className="input input-bordered w-full max-w-xs placeholder:text-sm placeholder:text-opacity-0"
               />
             </FieldWrapper>
 
-            <FieldWrapper label="Bạn chọn">
+            <FieldWrapper label={t("YourChoice")}>
               <RadioImageControlled
                 name="isHeads"
                 isBooleanValue
                 options={[
-                  { value: true, imageSrc: "/images/Coin-Heads.png", alt: "Heads", label: "Heads" },
-                  { value: false, imageSrc: "/images/Coin-Tails.png", alt: "Tails", label: "Tails" },
+                  { value: true, imageSrc: "/images/Coin-Heads.png", alt: "Heads", label: t("Heads") },
+                  { value: false, imageSrc: "/images/Coin-Tails.png", alt: "Tails", label: t("Tails") },
                 ]}
                 control={control}
               />
             </FieldWrapper>
 
-            <FieldWrapper label="Người thắng được">
-              <div>{100 - fee}% tiền cược</div>
+            <FieldWrapper label={t("WinnerReward")}>
+              <div>
+                {(value.betAmount * (100 + (100 - fee))) / 100} ETH{" "}
+                <span className="text-sm text-neutral-content">
+                  ({t("XPercentBet", { percent: 100 + (100 - fee) })})
+                </span>
+              </div>
             </FieldWrapper>
           </div>
 
           <div className="mt-5 flex justify-center">
             <button className="btn btn-info" type="submit">
-              Tạo mới
+              {t("Create")}
             </button>
           </div>
         </form>
@@ -307,7 +316,7 @@ const ClientAvailableGames = (props: Props) => {
         </div>
 
         <div className="flex flex-col gap-4">
-          <FieldWrapper label={"Bạn đã chọn"}>
+          <FieldWrapper label={t("YourChoice")}>
             <div className="flex gap-2 items-center">
               <Image
                 src={gameSelected?.player1Choice ? "/images/Coin-Tails.png" : "/images/Coin-Heads.png"}
@@ -317,25 +326,31 @@ const ClientAvailableGames = (props: Props) => {
                 className={`w-16 h-16 rounded-full border-2 border-info`}
               />
 
-              <div>{gameSelected?.player1Choice ? "Mặt Úp" : "Mặt ngửa"}</div>
+              <div>{gameSelected?.player1Choice ? t("Tails") : t("Heads")}</div>
             </div>
           </FieldWrapper>
 
-          <FieldWrapper label={"Số lượng ETH"}>{bigintToResultView(gameSelected?.betAmount)} ETH</FieldWrapper>
+          <FieldWrapper label={t("ETH_Amount")}>{weiToETH(gameSelected?.betAmount)} ETH</FieldWrapper>
 
-          <FieldWrapper label="Người thắng được">
-            <div>{100 - fee}% tiền cược</div>
+          <FieldWrapper label={t("WinnerReward")}>
+            <div>
+              {(bigIntToNumber(gameSelected?.betAmount) *
+                (100 + (100 - bigIntToNumber(gameSelected?.feePercentAtCreateTime)))) /
+                100}{" "}
+              ETH{" "}
+              <span className="text-sm text-neutral-content">({t("XPercentBet", { percent: 100 + (100 - fee) })})</span>
+            </div>
           </FieldWrapper>
 
           {!!result.winner && (
-            <FieldWrapper label="Kết quả">
+            <FieldWrapper label={t("Result")}>
               <div
                 className={classNames({
                   "text-success": result.winner === currentAccount?.account?.address,
                   "text-error": result.winner !== currentAccount?.account?.address,
                 })}
               >
-                {result.winner === currentAccount?.account?.address ? "Thắng" : "Thua"}
+                {result.winner === currentAccount?.account?.address ? t("Win") : t("Lose")}
               </div>
             </FieldWrapper>
           )}
@@ -344,17 +359,17 @@ const ClientAvailableGames = (props: Props) => {
         {!!result.winner && (
           <div className="mt-5 flex justify-center">
             <button className="btn btn-info" onClick={handleCloseCoinSpinning}>
-              Xác nhận
+              {t("Confirm")}
             </button>
           </div>
         )}
       </Modal>
 
-      <Modal ref={modalJoinGameRef} title="Tham gia trò chơi">
+      <Modal ref={modalJoinGameRef} title={t("JoinGame")}>
         <div className="flex flex-col gap-4">
-          <FieldWrapper label={"Host Address"}>{gameSelected?.player1}</FieldWrapper>
+          <FieldWrapper label={t("Host")}>{gameSelected?.player1}</FieldWrapper>
 
-          <FieldWrapper label={"Bạn sẽ chọn"}>
+          <FieldWrapper label={t("YouWillChoose")}>
             <div className="flex gap-2 items-center">
               <Image
                 src={gameSelected?.player1Choice ? "/images/Coin-Tails.png" : "/images/Coin-Heads.png"}
@@ -364,20 +379,26 @@ const ClientAvailableGames = (props: Props) => {
                 className={`w-16 h-16 rounded-full border-2 border-info`}
               />
 
-              <div>{gameSelected?.player1Choice ? "Mặt Úp" : "Mặt ngửa"}</div>
+              <div>{gameSelected?.player1Choice ? t("Tails") : t("Heads")}</div>
             </div>
           </FieldWrapper>
 
-          <FieldWrapper label={"Số lượng ETH"}>{bigintToResultView(gameSelected?.betAmount)} ETH</FieldWrapper>
+          <FieldWrapper label={t("ETH_Amount")}>{weiToETH(gameSelected?.betAmount)} ETH</FieldWrapper>
 
-          <FieldWrapper label="Người thắng được">
-            <div>{100 - fee}% tiền cược</div>
+          <FieldWrapper label={t("WinnerReward")}>
+            <div>
+              {(bigIntToNumber(+weiToETH(gameSelected?.betAmount)) *
+                (100 + (100 - bigIntToNumber(gameSelected?.feePercentAtCreateTime)))) /
+                100}{" "}
+              ETH{" "}
+              <span className="text-sm text-neutral-content">({t("XPercentBet", { percent: 100 + (100 - fee) })})</span>
+            </div>
           </FieldWrapper>
         </div>
 
         <div className="mt-5 flex justify-center">
           <button className="btn btn-info" type="submit" onClick={handleConfirmJoin}>
-            Tham gia
+            {t("Join")}
           </button>
         </div>
       </Modal>

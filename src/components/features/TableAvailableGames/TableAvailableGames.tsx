@@ -1,6 +1,7 @@
-import { Address } from "@/components/base/Address";
 import { CoinSide } from "@/components/base/CoinSide";
-import { bigintToResultView } from "@/utils/converter";
+import { CopyWrapper } from "@/components/base/CopyWrapper";
+import { useClientTranslations } from "@/libs/i18n-client";
+import { weiToETH, formatAddressView } from "@/utils/converter";
 import { CoinTossGame } from "@root/types/ethers-contracts/MainContractAbi";
 
 type Props = {
@@ -11,6 +12,7 @@ type Props = {
 };
 
 const TableAvailableGames = ({ data, currentAccount, onClickCancel, onClickJoin }: Props) => {
+  const { t } = useClientTranslations();
   const checkCanJoin = (address: string) => {
     return address !== currentAccount;
   };
@@ -22,9 +24,9 @@ const TableAvailableGames = ({ data, currentAccount, onClickCancel, onClickJoin 
         <thead>
           <tr>
             <th>Game ID</th>
-            <th>Host Address</th>
-            <th>Host's Choice</th>
-            <th>Bet Amount</th>
+            <th>{t("Host")}</th>
+            <th>{t("HostChoice")}</th>
+            <th>{t("ETH_Amount")}</th>
           </tr>
         </thead>
         <tbody>
@@ -33,12 +35,12 @@ const TableAvailableGames = ({ data, currentAccount, onClickCancel, onClickJoin 
               <tr key={game.gameId} className="hover">
                 <th>{game.gameId}</th>
                 <td>
-                  <Address address={game.player1} />
+                  <CopyWrapper stringValue={game.player1}>{formatAddressView(game.player1)}</CopyWrapper>
                 </td>
                 <td>
                   <CoinSide isHeads={game.player1Choice} />{" "}
                 </td>
-                <td>{bigintToResultView(game.betAmount)} ETH</td>
+                <td>{weiToETH(game.betAmount)} ETH</td>
                 <td>
                   {checkCanJoin(game.player1) ? (
                     <button
@@ -47,7 +49,7 @@ const TableAvailableGames = ({ data, currentAccount, onClickCancel, onClickJoin 
                         onClickJoin(game.gameId);
                       }}
                     >
-                      Join
+                      {t("Join")}
                     </button>
                   ) : (
                     <button
@@ -56,7 +58,7 @@ const TableAvailableGames = ({ data, currentAccount, onClickCancel, onClickJoin 
                         onClickCancel(game.gameId);
                       }}
                     >
-                      Cancel
+                      {t("Cancel")}
                     </button>
                   )}
                 </td>
