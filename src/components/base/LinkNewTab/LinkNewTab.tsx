@@ -12,7 +12,7 @@ const LinkNewTab = ({ children, href }: Props) => {
     <Link href={href} target="_blank">
       <div className="flex items-center gap-1 cursor-pointer">
         <div className="text-sm text-neutral-content hover:text-info hover:underline">{children}</div>{" "}
-        <ArrowTopRightOnSquareIcon className="text-info w-4 mb-[4px]" />
+        <ArrowTopRightOnSquareIcon className="text-info w-4" />
       </div>
     </Link>
   );

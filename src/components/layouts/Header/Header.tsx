@@ -1,17 +1,29 @@
 "use client";
 
 import { CopyWrapper } from "@/components/base/CopyWrapper";
+import { LinkNewTab } from "@/components/base/LinkNewTab";
 import { useWeb3 } from "@/contexts/web3Context";
 import { useClientTranslations } from "@/libs/i18n-client";
 import { weiToETH, formatAddressView } from "@/utils/converter";
-import { BanknotesIcon, ExclamationTriangleIcon, WalletIcon } from "@heroicons/react/24/outline";
+import {
+  BanknotesIcon,
+  ClipboardDocumentCheckIcon,
+  ExclamationTriangleIcon,
+  WalletIcon,
+} from "@heroicons/react/24/outline";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import { format } from "react-string-format";
 
 /**
  * Render button theme chỉ ở client để không bị lỗi hydration do ở server không lấy được theme
  */
-const ThemeButtonOnlyClient = dynamic(() => import("../../features/ThemeButton/ThemeButton"), {
+const ThemeButtonOnlyClient = dynamic(() => import("../../features/ThemeButton").then((x) => x.ThemeButton), {
+  ssr: false,
+  loading: () => <div className="flex-1 min-w-0">...</div>,
+});
+
+const LanguageButtonOnlyClient = dynamic(() => import("../../features/LanguageButton").then((x) => x.LanguageButton), {
   ssr: false,
   loading: () => <div className="flex-1 min-w-0">...</div>,
 });
@@ -49,6 +61,17 @@ const Header = (props: Props) => {
           <BanknotesIcon width={24} className="text-info" />
           <span>{weiToETH(currentAccount?.balance)} ETH</span>
         </div>
+
+        <LinkNewTab
+          href={format(process.env.NEXT_PUBLIC_ADDRESS_DETAIL_URL || "", process.env.NEXT_PUBLIC_CONTRACT_ADDRESS)}
+        >
+          <div className="flex gap-3">
+            <ClipboardDocumentCheckIcon width={24} className="text-info" />
+            <span className="text-[16px] leading-[24px] text-base-content">
+              Contract: {formatAddressView(process.env.NEXT_PUBLIC_CONTRACT_ADDRESS || "")}
+            </span>
+          </div>
+        </LinkNewTab>
       </div>
 
       <div className="flex flex-col justify-center items-center">
@@ -63,8 +86,9 @@ const Header = (props: Props) => {
         <h1 className="font-bold text-xl mt-5 border-y-[2px] border-info text-info">EZ Coin Toss</h1>
       </div>
 
-      <div className="flex-1 min-w-0 flex justify-end mb-auto">
+      <div className="flex-1 min-w-0 gap-2 flex justify-end mb-auto items-center">
         <ThemeButtonOnlyClient />
+        <LanguageButtonOnlyClient />
       </div>
     </div>
   );
