@@ -83,7 +83,7 @@ const Header = (props: Props) => {
           className="icon animate-[spin_3s_linear_infinite] w-[100px] h-[100px]"
         />
 
-        <h1 className="font-bold text-xl mt-5 border-y-[2px] border-info text-info">EZ Coin Toss</h1>
+        <h1 className="font-bold text-xl mt-5 border-y-[2px] border-info text-info">EZ Coin Spin</h1>
       </div>
 
       <div className="flex-1 min-w-0 gap-2 flex justify-end mb-auto items-center">

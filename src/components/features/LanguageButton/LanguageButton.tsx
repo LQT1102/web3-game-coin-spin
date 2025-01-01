@@ -1,5 +1,5 @@
 "use client";
-import { LANG_KEYS } from "@/constants/language";
+import { DEFAULT_LANG, LANG_KEYS } from "@/constants/language";
 import { getCookie, setCookie } from "@/utils/cookie";
 import classNames from "classnames";
 import React, { useEffect, useState } from "react";
@@ -18,9 +18,9 @@ const LanguageButton = (props: Props) => {
     },
   ];
   const [showList, setShowList] = useState(false);
-  const [lang, setLang] = useState();
+  const [lang, setLang] = useState<Nullable<string>>();
   useEffect(() => {
-    const langCookie = getCookie("NEXT_LOCALE");
+    const langCookie = getCookie("NEXT_LOCALE") || LANG_KEYS.EN;
     setLang(langCookie);
   }, []);
 
