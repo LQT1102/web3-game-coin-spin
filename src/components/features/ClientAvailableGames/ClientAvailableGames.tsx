@@ -334,7 +334,7 @@ const ClientAvailableGames = (props: Props) => {
 
           <FieldWrapper label={t("WinnerReward")}>
             <div>
-              {(bigIntToNumber(gameSelected?.betAmount) *
+              {(bigIntToNumber(weiToETH(gameSelected?.betAmount)) *
                 (100 + (100 - bigIntToNumber(gameSelected?.feePercentAtCreateTime)))) /
                 100}{" "}
               ETH{" "}
